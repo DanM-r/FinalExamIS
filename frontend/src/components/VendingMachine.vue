@@ -115,6 +115,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
   setup () {
     
@@ -126,44 +127,49 @@ export default {
     return {
       successMessage: '',
       errorMessage: '',
-      coffees: [
-        {
-          id: 1,
-          name: 'Americano',
-          units: 10,
-          price: 950.00,
-        },
-        {
-          id: 2,
-          name: 'Capuccino',
-          units: 10,
-          price: 1200.00,
-        }
-      ],
-      orderedCoffees: [
-        { id: 1, quantity: 2 },
-        { id: 2, quantity: 1 },
-      ],
+      coffees: [],
+      orderedCoffees: [],
       orderedCoffeeName: '',
       quantityOrdered: 0,
-      coins: [
-        { id: 1, value: 100, units: 1 },
-        { id: 2, value: 500, units: 0 },
-        { id: 3, value: 50, units: 1 },
-        { id: 4, value: 25, units: 1 },
-        { id: 5, value: 1000, units: 1 },
-      ],
+      coins: [],
       receiptDetails: {
         remainingToPay: 0,
         change: 0,
-        moneyAdded: [ { id: 2, quantity: 1 } ],
+        moneyAdded: [],
       },
       cashValueSelected: '',
       quantityCash: 0,
     }
   },
 
+  mounted() {
+    this.getCoffees();
+    this.getCoins();
+  },
+
   methods: {
+    getCoins() {
+      var instance = this;
+      axios.get("https://localhost:7170/api/VendingMachine/GetCoins")
+      .then((response) => {
+        this.coins = response.data;
+      })
+      .catch((error) => {
+        instance.manageBackendError(error)
+      });
+    },
+
+    getCoffees() {
+      var instance = this;
+      axios.get("https://localhost:7170/api/VendingMachine/GetCoffees")
+      .then((response) => {
+        this.coffees = response.data;
+      })
+      .catch((error) => {
+        instance.manageBackendError(error)
+      });
+    },
+
     calculateTotal() {
       var totalToPay = 0;
       for (let i = 0; i < this.orderedCoffees.length; ++i) {
@@ -313,14 +319,27 @@ export default {
 
     pay() {
       if (this.validatePayingOrder()) {
-        // Call the http get request
-        this.successMessage = `La compra se realizó con éxito. Su vuelto fue de ₡ ${this.receiptDetails.change}`;
-        this.errorMessage = '';
+        let instance = this;
+        axios.post("https://localhost:7170/api/VendingMachine/PostOrder",
+        {
+          coffees: this.orderedCoffees,
+          moneyAdded: this.receiptDetails.moneyAdded
+        })
+        .then((response) => {
+          this.successMessage = `La compra se realizó con éxito. Su vuelto fue de ₡ ${response.data}`;
+          this.errorMessage = '';
 
-        this.orderedCoffees = [];
-        this.receiptDetails.change = 0;
-        this.receiptDetails.remainingToPay = 0;
-        this.receiptDetails.moneyAdded = [];
+          this.orderedCoffees = [];
+          this.receiptDetails.change = 0;
+          this.receiptDetails.remainingToPay = 0;
+          this.receiptDetails.moneyAdded = [];
+
+          this.getCoffees();
+          this.getCoins();
+        })
+        .catch((error) => {
+          instance.manageBackendError(error);
+        })
       }
     },
 
@@ -336,6 +355,27 @@ export default {
       }
 
       return canPay;
+    },
+
+    manageBackendError(error) {
+      var errorMsg = "";
+      var errorStatus = 0;
+      if (error.response == undefined) {
+        errorMsg = "No hay conexión con el servidor.";
+        errorStatus = 408;
+      } else if (error.response.data) {
+        errorMsg = error.response.data;
+        errorStatus = error.response.status;
+      } else if (error.response.data.title) {
+        errorMsg = error.response.data.title;
+        errorStatus = error.response.status;
+      } else if (error.request) {
+        errorMsg = error.message;
+        errorStatus = error.response.status;
+      }
+      
+      console.log("ERROR " + errorStatus + " ----> " + errorMsg);
+      this.errorMessage = errorMsg;
     }
   }
 }
