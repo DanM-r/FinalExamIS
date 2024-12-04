@@ -4,3 +4,10 @@ $agrandir-font: 'Agrandir', sans-serif;
   font-family: 'Agrandir';
   src: url(./fonts/Agrandir-Regular.ttf);
 }
+
+$agrandir-bold-font: 'Agrandir-Bold', sans-serif;
+
+@font-face {
+  font-family: 'Agrandir-Bold';
+  src: url(./fonts/Agrandir-TextBold.ttf);
+}

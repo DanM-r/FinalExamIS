@@ -3,8 +3,16 @@
   font-family: "Agrandir";
   src: url(./fonts/Agrandir-Regular.ttf);
 }
+@font-face {
+  font-family: "Agrandir-Bold";
+  src: url(./fonts/Agrandir-TextBold.ttf);
+}
 .ff-agrandir {
   font-family: "Agrandir", sans-serif !important;
+}
+
+.ff-agrandirbold {
+  font-family: "Agrandir-Bold", sans-serif !important;
 }
 
 :root,
