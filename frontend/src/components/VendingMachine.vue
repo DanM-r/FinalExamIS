@@ -1,13 +1,13 @@
 <template>
   <div class="bg-primary d-flex gap-2 p-2 ff-agrandir">
-    <div class="p-3 d-flex flex-column" style="height: 98vh;">
+    <div class="p-3 d-flex flex-column flex-fill" style="height: 98vh;">
       <div>
         <div
-        v-show="isOrderMade"
+        v-show="successMessage.length > 0"
           class="alert alert-success ff-agrandirbold fw-bold fs-4" role="alert"
         >
           Compra realizada!<br>
-          <span class="fw-normal ff-agrandir fs-6">La compra se realizó con éxito. Su vuelto fue de ₡ {{ receiptDetails.change }}</span>
+          <span class="fw-normal ff-agrandir fs-6" v-text="successMessage"></span>
         </div>
         <div
           v-show="errorMessage.length > 0"
@@ -110,7 +110,7 @@ export default {
 
   data() {
     return {
-      isOrderMade: false,
+      successMessage: '',
       errorMessage: '',
       coffees: [
         {
@@ -133,10 +133,11 @@ export default {
       orderedCoffeeName: '',
       quantityOrdered: 0,
       coins: [
-        { id: 1, value: 100, available: 10 },
-        { id: 2, value: 500, available: 10 },
-        { id: 3, value: 50, available: 10 },
-        { id: 4, value: 25, available: 10 },
+        { id: 1, value: 100, available: 1 },
+        { id: 2, value: 500, available: 0 },
+        { id: 3, value: 50, available: 1 },
+        { id: 4, value: 25, available: 1 },
+        { id: 5, value: 1000, available: 1 },
       ],
       receiptDetails: {
         remainingToPay: 0,
@@ -187,47 +188,140 @@ export default {
     },
 
     addToOrder() {
-      let coffeeId = this.coffees.find(coffee => coffee.name === this.orderedCoffeeName).id;
-      let coffeeOrder = this.orderedCoffees.find(coffee => coffee.id === coffeeId);
+      if (this.validateAddingCoffee()) {
+        let coffeeId = this.coffees.find(coffee => coffee.name === this.orderedCoffeeName).id;
+        let coffeeOrder = this.orderedCoffees.find(coffee => coffee.id === coffeeId);
 
-      if (coffeeOrder != undefined) {
-        coffeeOrder.quantity += Number(this.quantityOrdered);
-      } else {
-        this.orderedCoffees.push({
-          id:       coffeeId,
-          quantity: Number(this.quantityOrdered)
-        });
+        if (coffeeOrder != undefined) {
+          coffeeOrder.quantity += Number(this.quantityOrdered);
+        } else {
+          this.orderedCoffees.push({
+            id:       coffeeId,
+            quantity: Number(this.quantityOrdered)
+          });
+        }
+        this.receiptDetails.change = this.calculateChange();
+        
+        this.orderedCoffeeName = '';
+        this.quantityOrdered = 0;
       }
-      this.receiptDetails.change = this.calculateChange();
+    },
+
+    validateAddingCoffee() {
+      let canOrder = false;
       
-      this.orderedCoffeeName = '';
-      this.quantityOrdered = 0;
+      if (this.orderedCoffeeName.length <= 0) {
+        this.errorMessage = "Debe seleccionar un cafe para añadir a la orden.";
+      } else if (this.quantityOrdered <= 0) {
+        this.errorMessage = "Debe ingresar una cantidad valida de cafes.";
+      } else if (!this.validateHasEnoughCoffeeUnits()) {
+        this.errorMessage = "No hay suficientes unidades del cafe que se esta pidiendo.";
+      } else {
+        canOrder = true;
+      }
+
+      return canOrder;
+    },
+
+    validateHasEnoughCoffeeUnits() {
+      let canOrder = false;
+      let coffee = this.coffees.find(coffee => coffee.name === this.orderedCoffeeName);
+      let coffeeOrder = this.orderedCoffees.find(coffeeOrdered => coffeeOrdered.id === coffee.id);
+      let alreadyOrderedUnits = coffeeOrder != undefined ? coffeeOrder.quantity : 0;
+
+      if (coffee.units >= Number(this.quantityOrdered) + alreadyOrderedUnits) {
+        canOrder = true;
+      }
+      return canOrder;
     },
 
     addCash() {
-      let coinId = this.coins.find(coin => coin.value === Number(this.cashValueSelected.substring(2))).id;
-      let alreadyAddedCoin = this.receiptDetails.moneyAdded.find(coin => coin.id === coinId);
+      if (this.validateAddingCash()) {
+        let coinId = this.coins.find(coin => coin.value === Number(this.cashValueSelected.substring(2))).id;
+        let alreadyAddedCoin = this.receiptDetails.moneyAdded.find(coin => coin.id === coinId);
 
-      if (alreadyAddedCoin != undefined) {
-        alreadyAddedCoin.quantity += Number(this.quantityCash);
-      } else {
-        this.receiptDetails.moneyAdded.push({
-          id:       coinId,
-          quantity: Number(this.quantityCash)
-        });
+        if (alreadyAddedCoin != undefined) {
+          alreadyAddedCoin.quantity += Number(this.quantityCash);
+        } else {
+          this.receiptDetails.moneyAdded.push({
+            id:       coinId,
+            quantity: Number(this.quantityCash)
+          });
+        }
+        this.receiptDetails.change = this.calculateChange();
+
+        this.cashValueSelected = '';
+        this.quantityCash = 0;
       }
-      this.receiptDetails.change = this.calculateChange();
+    },
 
-      this.cashValueSelected = '';
-      this.quantityCash = 0;
+    validateAddingCash() {
+      let canAddCash = false;
+
+      if (this.cashValueSelected.length <= 0) {
+        this.errorMessage = "Debe seleccionar una moneda o billete como fondos para realizar la compra.";
+      } else if (isNaN(this.quantityCash)) {
+        this.errorMessage = "Solo puede ingresar numeros en la cantidad de monedas o billetes.";
+      } else if (this.quantityCash <= 0) {
+        this.errorMessage = "Debe ingresar una cantidad mayor de monedas o billetes.";
+      } else {
+        canAddCash = true;
+      }
+
+      return canAddCash;
+    },
+
+    validateHasEnoughForChange() {
+      let changeAmount = this.calculateChange();
+
+      // Coins array must be sorted in descending order
+      this.coins.sort((a, b) => {
+        if (a.value > b.value) {
+          return 1;
+        } else if (a.value == b.value) {
+          return 0;
+        }
+        return -1;
+      });
+      this.coins.reverse();
+
+      // For each coin, if it is small enough, substracts from the change the value times the quantity it has including what the user gave the machine.
+      for (let i = 0; i < this.coins.length && changeAmount > 0; i++) {
+        if (changeAmount >= this.coins[i].value) {
+          let addedCashWithSameValue = this.receiptDetails.moneyAdded.find(coin => coin.value === this.coins[i].value);
+          let addedCashAmount = addedCashWithSameValue != undefined ? addedCashWithSameValue.quantity : 0;
+          changeAmount -= this.coins[i].value * (this.coins[i].quantity + addedCashAmount);
+        }
+      }
+
+      return changeAmount <= 0;
     },
 
     pay() {
-      // Call the http get request
-      this.orderedCoffees = [];
-      this.receiptDetails.change = 0;
-      this.receiptDetails.remainingToPay = 0;
-      this.receiptDetails.moneyAdded = [];
+      if (this.validatePayingOrder()) {
+        // Call the http get request
+        this.successMessage = `La compra se realizó con éxito. Su vuelto fue de ₡ ${this.receiptDetails.change}`;
+        this.errorMessage = '';
+
+        this.orderedCoffees = [];
+        this.receiptDetails.change = 0;
+        this.receiptDetails.remainingToPay = 0;
+        this.receiptDetails.moneyAdded = [];
+      }
+    },
+
+    validatePayingOrder() {
+      let canPay = false;
+
+      if (this.receiptDetails.remainingToPay > 0) {
+        this.errorMessage = "Debe primero ingresar suficientes fondos para cancelar la orden.";
+      } else if (!this.validateHasEnoughForChange()) {
+        this.errorMessage = "Fallo al realizar la compra";
+      }  else {
+        canPay = true;
+      }
+
+      return canPay;
     }
   }
 }
