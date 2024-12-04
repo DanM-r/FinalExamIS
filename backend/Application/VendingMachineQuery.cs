@@ -14,12 +14,12 @@ namespace backend.Application
 
         public List<CoffeeModel> ObtainCoffees()
         {
-            return new List<CoffeeModel>();
+            return this.handler.GetCoffees();
         }
 
         public List<CoinModel> ObtainCoins()
         {
-            return new List<CoinModel>();
+            return this.handler.GetCoins();
         }
     }
 }

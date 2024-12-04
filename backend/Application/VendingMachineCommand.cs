@@ -14,7 +14,7 @@ namespace backend.Application
 
         public int AddOrder(OrderModel order)
         {
-            return 0;
+            return this.handler.AddOrder(order);
         }
     }
 }
