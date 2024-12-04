@@ -99,15 +99,15 @@
         </select>
         <label class="form-label">Cantidad</label>
         <input class="form-control form-control-sm border-0 bg-secondary" type="text" v-model="quantityCash">
-        <button @click="addCash"
-          class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2"
-        >
-          Agregar
-        </button>
         <div class="d-flex flex-column">
+          <button @click="addCash"
+            class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2 flex-fill"
+          >
+            Agregar
+          </button>
           <span>Falta de cancelar: ₡ {{ this.receiptDetails.remainingToPay }}</span><br>
           <span>Vuelto: ₡ {{ this.receiptDetails.change }}</span>
-          <button class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2 flex-fill" @click="pay">Pagar</button>
+          <button class="btn btn-success ff-agrandirbold fw-bold text-primary my-2 flex-fill" @click="pay">Pagar</button>
         </div>
       </div>
     </div>
@@ -147,11 +147,11 @@ export default {
       orderedCoffeeName: '',
       quantityOrdered: 0,
       coins: [
-        { id: 1, value: 100, available: 1 },
-        { id: 2, value: 500, available: 0 },
-        { id: 3, value: 50, available: 1 },
-        { id: 4, value: 25, available: 1 },
-        { id: 5, value: 1000, available: 1 },
+        { id: 1, value: 100, units: 1 },
+        { id: 2, value: 500, units: 0 },
+        { id: 3, value: 50, units: 1 },
+        { id: 4, value: 25, units: 1 },
+        { id: 5, value: 1000, units: 1 },
       ],
       receiptDetails: {
         remainingToPay: 0,
@@ -304,7 +304,7 @@ export default {
         if (changeAmount >= this.coins[i].value) {
           let addedCashWithSameValue = this.receiptDetails.moneyAdded.find(coin => coin.value === this.coins[i].value);
           let addedCashAmount = addedCashWithSameValue != undefined ? addedCashWithSameValue.quantity : 0;
-          changeAmount -= this.coins[i].value * (this.coins[i].quantity + addedCashAmount);
+          changeAmount -= this.coins[i].value * (this.coins[i].units + addedCashAmount);
         }
       }
 
