@@ -2,7 +2,7 @@
 
 ## Project setup
 ```
-npm install bootstrap axios
+npm install bootstrap axios sass
 ```
 
 ### Compiles and hot-reloads for development

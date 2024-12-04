@@ -6,7 +6,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import bootstrap from 'bootstrap';
 
-// import '../scss/custom.css'
+import '../scss/custom.css';
 
 const app = createApp(App);
 
