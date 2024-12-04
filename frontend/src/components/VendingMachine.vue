@@ -34,13 +34,21 @@
     <div class="flex-fill p-4" style="height: 98vh;">
       <div>
         <h3 class="ff-agrandirbold fw-bold">Seleccion cafes por comprar</h3>
-        <label>Tipo de cafe</label>
-        <select v-model="orderedCoffeeName">
-          <option v-for="coffee in coffees" v-bind:key="coffee.name">{{ coffee.name }}</option>
+        <label class="form-label">Tipo de cafe</label>
+        <select v-model="orderedCoffeeName"
+          class="form-select form-select-sm border-0 bg-secondary"
+        >
+          <option class="ff-agrandir" v-for="coffee in coffees" v-bind:key="coffee.name">{{ coffee.name }}</option>
         </select>
-        <label>Cantidad de cafes</label>
-        <input type="text" v-model="quantityOrdered">
-        <button @click="addToOrder">Agregar</button>
+        <label class="form-label">Cantidad de cafes</label>
+        <input class="form-control form-control-sm border-0 bg-secondary" type="text" v-model="quantityOrdered">
+        <div class="d-flex">
+          <button @click="addToOrder"
+            class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2 flex-fill"
+          >
+            Agregar
+          </button>
+        </div>
       </div><hr>
       <div>
         <h3 class="ff-agrandirbold fw-bold">Vista de la Orden</h3>
@@ -83,18 +91,24 @@
       </div><hr>
       <div>
         <h3 class="ff-agrandirbold fw-bold">Realizar el pago</h3>
-        <label>Moneda o billete</label>
-        <select v-model="cashValueSelected">
+        <label class="form-label">Moneda o billete</label>
+        <select v-model="cashValueSelected"
+          class="form-select form-select-sm border-0 bg-secondary"
+        >
           <option v-for="coin in coins" v-bind:key="coin.value">₡ {{ coin.value }}</option>
         </select>
-        <label>Cantidad</label>
-        <input type="text" v-model="quantityCash">
-        <button @click="addCash">Agregar</button>
-        <div>
+        <label class="form-label">Cantidad</label>
+        <input class="form-control form-control-sm border-0 bg-secondary" type="text" v-model="quantityCash">
+        <button @click="addCash"
+          class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2"
+        >
+          Agregar
+        </button>
+        <div class="d-flex flex-column">
           <span>Falta de cancelar: ₡ {{ this.receiptDetails.remainingToPay }}</span><br>
           <span>Vuelto: ₡ {{ this.receiptDetails.change }}</span>
+          <button class="btn btn-ternary ff-agrandirbold fw-bold text-primary my-2 flex-fill" @click="pay">Pagar</button>
         </div>
-        <button @click="pay">Pagar</button>
       </div>
     </div>
   </div>
