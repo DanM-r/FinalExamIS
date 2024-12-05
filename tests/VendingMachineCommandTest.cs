@@ -1,7 +1,6 @@
 using backend.Application;
 using backend.Domain;
 using backend.Infrastructure;
-using Moq;
 
 namespace tests
 {

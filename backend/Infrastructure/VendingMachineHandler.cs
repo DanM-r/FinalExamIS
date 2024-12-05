@@ -47,12 +47,35 @@ namespace backend.Infrastructure
             return this.configuration.Coffees;
         }
 
-        public int AddOrder(OrderModel order)
+        public List<IdentifierAndQuantityModel> AddOrder(OrderModel order)
         {
             double totalToPay = this.UpdateStock(order.coffees);
             int change = this.CalculateChange(totalToPay, order.moneyAdded);
+            List<IdentifierAndQuantityModel> changeCoins = this.CalculateChangeCoins(change);
             this.SaveCoinsAndCoffeesData();
-            return change;
+            return changeCoins;
+        }
+
+        private List<IdentifierAndQuantityModel> CalculateChangeCoins(double change)
+        {
+            double remainingChange = change;
+            List<IdentifierAndQuantityModel> changeCoins = new List<IdentifierAndQuantityModel>();
+            this.configuration.Coins.OrderByDescending(coin => coin.value);
+            foreach (var coin in this.configuration.Coins)
+            {
+                if (coin.value <= remainingChange)
+                {
+                    int quantity = Convert.ToInt32(Math.Floor(remainingChange / coin.value));
+                    changeCoins.Add(new IdentifierAndQuantityModel()
+                    {
+                        Id = coin.Id,
+                        quantity = quantity
+                    });
+                    remainingChange -= quantity * coin.value;
+                    coin.units -= quantity;
+                }
+            }
+            return changeCoins;
         }
 
         private double UpdateStock(List<IdentifierAndQuantityModel> orderedCoffees)

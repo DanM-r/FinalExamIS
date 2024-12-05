@@ -12,7 +12,7 @@ namespace backend.Application
             this.handler = handler;
         }
 
-        public int AddOrder(OrderModel order)
+        public List<IdentifierAndQuantityModel> AddOrder(OrderModel order)
         {
             this.validateOrderIsNotNull(order);
             this.validateValidIdsAndQuantities(order);

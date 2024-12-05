@@ -6,7 +6,7 @@ namespace backend.Infrastructure
     {
         public List<CoinModel> GetCoins();
         public List<CoffeeModel> GetCoffees();
-        public int AddOrder(OrderModel order);
+        public List<IdentifierAndQuantityModel> AddOrder(OrderModel order);
         public int CalculateChange(double totalToPay, List<IdentifierAndQuantityModel> moneyAdded);
         public double CalculateTotalToPay(List<IdentifierAndQuantityModel> orderedCoffees);
     }

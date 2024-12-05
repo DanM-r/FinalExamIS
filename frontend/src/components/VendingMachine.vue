@@ -8,6 +8,9 @@
         >
           Compra realizada!<br>
           <span class="fw-normal ff-agrandir fs-6" v-text="successMessage"></span>
+          <div class="fw-normal ff-agrandir fs-6" v-for="changeCoin in receiptDetails.changeCoins" v-bind:key="changeCoin">
+            <div>{{ changeCoin.quantity }} x ₡ {{ coins.find(coin => coin.id === changeCoin.id).value }}</div>
+          </div>
         </div>
         <div
           v-show="errorMessage.length > 0"
@@ -136,6 +139,7 @@ export default {
         remainingToPay: 0,
         change: 0,
         moneyAdded: [],
+        changeCoins: [],
       },
       cashValueSelected: '',
       quantityCash: 0,
@@ -284,6 +288,8 @@ export default {
         this.errorMessage = "Solo puede ingresar numeros en la cantidad de monedas o billetes.";
       } else if (this.quantityCash <= 0) {
         this.errorMessage = "Debe ingresar una cantidad mayor de monedas o billetes.";
+      } else if (this.orderedCoffees.length <= 0) {
+        this.errorMessage = "Debe ordenar algo antes de ingresar fondos.";
       } else {
         canAddCash = true;
       }
@@ -326,7 +332,8 @@ export default {
           moneyAdded: this.receiptDetails.moneyAdded
         })
         .then((response) => {
-          this.successMessage = `La compra se realizó con éxito. Su vuelto fue de ₡ ${response.data}`;
+          this.receiptDetails.changeCoins = response.data;
+          this.successMessage = `La compra se realizó con éxito. Su vuelto fue de ₡ ${this.receiptDetails.change}. Desglose:`;
           this.errorMessage = '';
 
           this.orderedCoffees = [];
@@ -350,7 +357,9 @@ export default {
         this.errorMessage = "Debe primero ingresar suficientes fondos para cancelar la orden.";
       } else if (!this.validateHasEnoughForChange()) {
         this.errorMessage = "Fallo al realizar la compra";
-      }  else {
+      } else if (this.orderedCoffees.length <= 0) {
+        this.errorMessage = "Debe ordenar algo antes de pagar.";
+      } else {
         canPay = true;
       }
 
