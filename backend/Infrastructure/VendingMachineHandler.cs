@@ -15,7 +15,6 @@ namespace backend.Infrastructure
                 (this.ReadJsonConfigurationFile("CoffeeConfiguration.json"));
             this.configuration.Coins = JsonConvert.DeserializeObject<List<CoinModel>>
                 (this.ReadJsonConfigurationFile("CoinConfiguration.json"));
-            Console.WriteLine("Se lee el constriuctor");
         }
 
         private string ReadJsonConfigurationFile(string filename)
@@ -40,10 +39,6 @@ namespace backend.Infrastructure
 
         public List<CoinModel> GetCoins()
         {
-            foreach (var coin in this.configuration.Coins)
-            {
-                Console.WriteLine(coin.units);
-            }
             return this.configuration.Coins;
         }
 
@@ -55,7 +50,9 @@ namespace backend.Infrastructure
         public int AddOrder(OrderModel order)
         {
             double totalToPay = this.UpdateStock(order.coffees);
-            return this.CalculateChange(totalToPay, order.moneyAdded);
+            int change = this.CalculateChange(totalToPay, order.moneyAdded);
+            this.SaveCoinsAndCoffeesData();
+            return change;
         }
 
         private double UpdateStock(List<IdentifierAndQuantityModel> orderedCoffees)
@@ -67,12 +64,21 @@ namespace backend.Infrastructure
                 coffee.Units -= orderedCoffee.quantity;
                 totalToPay += coffee.Price * orderedCoffee.quantity;
             }
-
-            this.SaveJsonConfiguration("CoffeeConfiguration.json", JsonConvert.SerializeObject(this.configuration.Coffees));
             return totalToPay;
         }
 
-        private int CalculateChange(double totalToPay, List<IdentifierAndQuantityModel> moneyAdded)
+        public double CalculateTotalToPay(List<IdentifierAndQuantityModel> orderedCoffees)
+        {
+            double totalToPay = 0;
+            foreach (var orderedCoffee in orderedCoffees)
+            {
+                var coffee = this.configuration.Coffees.Find(coffee => coffee.Id == orderedCoffee.Id);
+                totalToPay += coffee.Price * orderedCoffee.quantity;
+            }
+            return totalToPay;
+        }
+
+        public int CalculateChange(double totalToPay, List<IdentifierAndQuantityModel> moneyAdded)
         {
             double remainingToPay = totalToPay;
             foreach (IdentifierAndQuantityModel cashAdded in moneyAdded)
@@ -88,8 +94,13 @@ namespace backend.Infrastructure
                 this.configuration.Coins[i].units += amount;
             }
 
-            this.SaveJsonConfiguration("CoinConfiguration.json", JsonConvert.SerializeObject(this.configuration.Coins));
             return Convert.ToInt32(Math.Abs(remainingToPay));
+        }
+
+        private void SaveCoinsAndCoffeesData()
+        {
+            this.SaveJsonConfiguration("CoffeeConfiguration.json", JsonConvert.SerializeObject(this.configuration.Coffees));
+            this.SaveJsonConfiguration("CoinConfiguration.json", JsonConvert.SerializeObject(this.configuration.Coins));
         }
     }
 }
