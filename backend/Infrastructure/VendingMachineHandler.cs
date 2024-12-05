@@ -51,9 +51,20 @@ namespace backend.Infrastructure
         {
             double totalToPay = this.UpdateStock(order.coffees);
             int change = this.CalculateChange(totalToPay, order.moneyAdded);
+            this.UpdateCoinAmounts(order.moneyAdded);
             List<IdentifierAndQuantityModel> changeCoins = this.CalculateChangeCoins(change);
             this.SaveCoinsAndCoffeesData();
             return changeCoins;
+        }
+
+        private void UpdateCoinAmounts(List<IdentifierAndQuantityModel> moneyAdded)
+        {
+            for (int i = 0; i < this.configuration.Coins.Count; i++)
+            {
+                IdentifierAndQuantityModel cashAdded = moneyAdded.Find(cashAdded => cashAdded.Id == this.configuration.Coins[i].Id);
+                int amount = cashAdded != null ? cashAdded.quantity : 0;
+                this.configuration.Coins[i].units += amount;
+            }
         }
 
         private List<IdentifierAndQuantityModel> CalculateChangeCoins(double change)
@@ -109,14 +120,6 @@ namespace backend.Infrastructure
                 CoinModel coin = this.configuration.Coins.Find(coin => coin.Id == cashAdded.Id);
                 remainingToPay -= cashAdded.quantity * coin.value;
             }
-
-            for (int i = 0; i < this.configuration.Coins.Count; i++)
-            {
-                IdentifierAndQuantityModel cashAdded = moneyAdded.Find(cashAdded => cashAdded.Id == this.configuration.Coins[i].Id);
-                int amount = cashAdded != null ? cashAdded.quantity : 0;
-                this.configuration.Coins[i].units += amount;
-            }
-
             return Convert.ToInt32(Math.Abs(remainingToPay));
         }
 

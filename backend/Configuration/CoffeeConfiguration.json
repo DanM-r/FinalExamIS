@@ -1,1 +1,26 @@
-[{"Id":1,"Name":"Americano","Units":4,"Price":950.0},{"Id":3,"Name":"Capuchino","Units":8,"Price":1200.0},{"Id":5,"Name":"Latte","Units":8,"Price":1350.0},{"Id":7,"Name":"Mocachino","Units":12,"Price":1200.0}]
+[
+    {
+        "Id": 1,
+        "Name": "Americano",
+        "Units": 10,
+        "Price": 950.0
+    },
+    {
+        "Id": 3,
+        "Name": "Capuchino",
+        "Units": 8,
+        "Price": 1200.0
+    },
+    {
+        "Id": 5,
+        "Name": "Latte",
+        "Units": 10,
+        "Price": 1350.0
+    },
+    {
+        "Id": 7,
+        "Name": "Mocachino",
+        "Units": 15,
+        "Price": 1200.0
+    }
+]

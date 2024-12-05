@@ -121,8 +121,6 @@
 import axios from 'axios';
 export default {
   setup () {
-    
-
     return {}
   },
 
@@ -371,7 +369,7 @@ export default {
       var errorStatus = 0;
       if (error.response == undefined) {
         errorMsg = "No hay conexión con el servidor.";
-        errorStatus = 408;
+        errorStatus = 408 /* Request Timeout status code */;
       } else if (error.response.data) {
         errorMsg = error.response.data;
         errorStatus = error.response.status;

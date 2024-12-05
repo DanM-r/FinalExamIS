@@ -64,7 +64,6 @@ namespace backend.Application
 
             foreach (IdentifierAndQuantityModel orderedCoffee in order.coffees)
             {
-                Console.WriteLine(coffees == null);
                 CoffeeModel coffee = coffees.Find(coffee => coffee.Id == orderedCoffee.Id);
                 if (coffee.Units < orderedCoffee.quantity)
                 {
@@ -77,8 +76,6 @@ namespace backend.Application
         {
             List<CoinModel> coins = this.handler.GetCoins();
             int changeAmount = this.handler.CalculateChange(this.handler.CalculateTotalToPay(order.coffees), order.moneyAdded);
-
-            // Coins array must be sorted in descending order
             coins.OrderByDescending(coin => coin.value);
 
             // For each coin, if it is small enough, substracts from the change the value times the quantity it has including what the user gave the machine.
